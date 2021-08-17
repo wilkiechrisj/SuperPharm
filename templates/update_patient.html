@@ -1,0 +1,100 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Update Patient</h1>
+    <div class ="content-section">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}   <!--sets CSRF token -->
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Update Patient:</legend>
+                
+                <div class="form-group">
+                    {{ form.patientID.label(class="form-control-label")}}
+                    {% if form.patientID.errors %}
+                        {{ form.patientID(class="form-control form-control-lg is-invalid")}}
+                        <div class='invalid-feedback'>
+                            {% for error in form.patientID.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.patientID(class="form-control form-control-lg", value=data['patientID'], disabled=True)}}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.firstName.label(class="form-control-label")}}
+                    {% if form.firstName.errors %}
+                        {{ form.firstName(class="form-control form-control-lg is-invalid")}}
+                        <div class='invalid-feedback'>
+                            {% for error in form.firstName.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.firstName(class="form-control form-control-lg", value=data['firstName'])}}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.lastName.label(class="form-control-label")}}
+                    {% if form.lastName.errors %}
+                        {{ form.lastName(class="form-control form-control-lg is-invalid")}}
+                        <div class='invalid-feedback'>
+                            {% for error in form.lastName.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.lastName(class="form-control form-control-lg", value=data['lastName'])}}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.phoneNumber.label(class="form-control-label")}}
+                    {% if form.phoneNumber.errors %}
+                        {{ form.phoneNumber(class="form-control form-control-lg is-invalid")}}
+                        <div class='invalid-feedback'>
+                            {% for error in form.phoneNumber.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.phoneNumber(class="form-control form-control-lg", value=data['phoneNumber'])}}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.addressID.label(class="form-control-label")}}
+                    {% if form.addressID.errors %}
+                        {{ form.addressID(class="form-control form-control-lg is-invalid")}}
+                        <div class='invalid-feedback'>
+                            {% for error in form.addressID.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.addressID(class="form-select form-control-lg")}}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.birthDate.label(class="form-control-label")}}
+                    {% if form.birthDate.errors %}
+                        {{ form.birthDate(class="form-control form-control-lg is-invalid")}}
+                        <div class='invalid-feedback'>
+                            {% for error in form.birthDate.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.birthDate(class="form-control form-control-lg", value=data['birthDate'])}}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-outline-info", value='Update')}}
+                </div>
+            </fieldset>
+        </form>
+    </div>
+{% endblock content %}

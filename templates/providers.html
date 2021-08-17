@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Healthcare Providers</h1>
+<section>This page is used to manage the Healthcare Providers table
+    <ul>
+        <li>The Healthcare Providers Table will display all providers and their information.</li>
+        <li>The form can be used to add a new provider.</li>
+        <li>The buttons on the right of the table on each row can be used to update or delete the provider in that row.</li>
+        <li>NOTE: Deleting a provider from this table will also delete them in the Prescriptions and Provider Patient Tables.</li>
+    </ul>
+</section>
+    <div class ="content-section">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}   <!--sets CSRF token -->
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Add Provider</legend>
+
+                <div class="form-group">
+                    {{ form.nationalProviderIdentifier.label(class="form-control-label")}}
+                    {% if form.nationalProviderIdentifier.errors %}
+                        {{ form.nationalProviderIdentifier(class="form-control form-control-lg is-invalid")}}
+                        <div class='invalid-feedback'>
+                            {% for error in form.nationalProviderIdentifier.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.nationalProviderIdentifier(class="form-control form-control-lg")}}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.firstName.label(class="form-control-label")}}
+                    {% if form.firstName.errors %}
+                        {{ form.firstName(class="form-control form-control-lg is-invalid")}}
+                        <div class='invalid-feedback'>
+                            {% for error in form.nationalDrugCode.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.firstName(class="form-control form-control-lg")}}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.lastName.label(class="form-control-label")}}
+                    {% if form.lastName.errors %}
+                        {{ form.lastName(class="form-control form-control-lg is-invalid")}}
+                        <div class='invalid-feedback'>
+                            {% for error in form.lastName.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.lastName(class="form-control form-control-lg")}}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.specialty.label(class="form-control-label")}}
+                    {% if form.specialty.errors %}
+                        {{ form.specialty(class="form-control form-control-lg is-invalid")}}
+                        <div class='invalid-feedback'>
+                            {% for error in form.specialty.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.specialty(class="form-control form-control-lg")}}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-outline-info")}}
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    <br>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">NPI</th>
+                <th scope="col">First Name</th>
+                <th scope="col">Last Name</th>
+                <th scope="col">Specialty</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in rows %}
+            <tr>
+                <th scope="row">{{ r["nationalProviderIdentifier"] }}</th>
+                <td>{{ r["firstName"] }}</td>
+                <td>{{ r["lastName"] }}</td>
+                <td>{{ r["specialty"] }}</td>
+                <td>
+                    {% set npi = r['nationalProviderIdentifier'] %}
+                    {% set update = urlroot + 'update_provider/' + npi %}
+                    {% set delete = urlroot + 'delete_provider/' + npi %}
+                    <a href={{ update }} class="btn btn-outline-warning">EDIT</a>
+                    <a href={{ delete }} class="btn btn-outline-danger">DELETE</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endblock content %}
+    

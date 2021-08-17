@@ -1,0 +1,259 @@
+{% extends "layout.html" %}
+{% block jscode %}
+<script>
+    // script to handle update and delete functions
+    $(document).ready(function(){
+
+        // update button click
+        $(".btn-outline-warning").click(function(){
+
+            // saves current fields as variables
+            var nationalDrugCode = this.id.replace("drugUpdate_", "");
+            console.log(nationalDrugCode)
+            var genericName = $("#genericName_" + nationalDrugCode).text();
+            var brandName = $("#brandName_" + nationalDrugCode).text();
+            var strength = $("#strength_" + nationalDrugCode).text();
+            var quantityAvailable = $("#quantityAvailable_" + nationalDrugCode).text();
+            
+            // updates hidden form values to values in row to be edited
+            $('#inputNDC').val(nationalDrugCode);
+            $('#inputGenericName').val(genericName);
+            $('#inputBrandName').val(brandName);
+            $('#inputStrength').val(strength);
+            $('#inputQuantity').val(quantityAvailable);
+            
+            // shows update form, disables PK since this should not change
+            $('#inputNDC').attr('disabled', true)
+            $('#updateModal').modal('show')
+
+            // submit update form
+            $('#updateForm').validate({
+                rules: {
+                    genericName: {
+                        required: true,
+                        maxlength: 255
+                    },
+                    brandName: {
+                        required: true,
+                        maxlength: 255
+                    },
+                    strength: {
+                        required: true,
+                        maxlength: 255
+                    },
+                    quantityAvailable: {
+                        required: true,
+                        digits: true
+                    }
+                },
+                messages: {
+                    quantityAvailable: 'Please enter only a positive number.'
+                },
+
+                submitHandler: function(form){
+                    var formData = {
+                        ndc:nationalDrugCode,
+                        gN:$('#inputGenericName').val(),
+                        bN:$('#inputBrandName').val(),
+                        sT:$('#inputStrength').val(),
+                        qA:$('#inputQuantity').val(),
+                    };
+
+                    // sends POST request to update_address route
+                    $.ajax({
+                        url: "/update_drug",
+                        type: "POST",
+                        data: formData,
+                        success: function(successful){
+                            // refreshes page on success
+                            if (successful=1){
+                                console.log("update success");
+                                window.location.href = window.location.href;
+                            }else{
+                                console.log("update failed");
+                                window.location.href = window.location.href;
+                            };
+                        },
+                    });
+                },
+            });
+        });
+
+        // closes update popup form on click
+        $(".close").click(function(){
+            $('#updateModal').modal('hide')
+        });
+
+
+        // delete button click
+        $(".btn-outline-danger").click(function(){
+            // get addressID of row to be deleted and sends post request to delete
+            var nationalDrugCode = this.id.replace("drugDelete_", "");
+            $.ajax({
+                url: "/delete_drug",
+                type: "POST",
+                data: {ndc:nationalDrugCode},
+                success: function(successful){
+                    if (successful=1){
+                        console.log("delete success");
+                        window.location.href = window.location.href;
+                    }else{
+                        console.log("delete failed");
+                        window.location.href = window.location.href;
+                    };
+                }
+            });
+        });
+    });
+</script>
+{% endblock jscode %}
+{% block content %}
+<h1>Drugs</h1>
+<section>This page is used to manage the Drugs Table
+    <ul>
+        <li>The "Drugs Table" displays all the existing drugs in the Pharmacy</li>
+        <li>Pharmacy employees can use this to update, add, or delete a drug</li>
+        <li>One drug can be linked to multiple prescriptions so please be careful!</li>
+    </ul>
+</section>
+<div class="modal" id="updateModal" tabindex="-1" role="dialog">  <!--modal update form -->
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Update Drug</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="updateForm">
+                <div class="form-group">
+                    <label for="NDC">National Drug Code</label>
+                    <input type="text" class="form-control" id="inputNDC">
+                </div>
+                <div class="form-group">
+                    <label for="genericName">Generic Name</label>
+                    <input type="text" name="genericName" class="form-control" id="inputGenericName">
+                </div>
+                <div class="form-group">
+                    <label for="brandName">Brand Name</label>
+                    <input type="text" name="brandName" class="form-control" id="inputBrandName">
+                </div>
+                <div class="form-group">
+                    <label for="strength">Strength</label>
+                    <input type="text" name="strength" class="form-control" id="inputStrength">
+                </div>
+                <div class="form-group">
+                    <label for="quantityAvailable">Quantity Available</label>
+                    <input type="text" name="quantityAvailable" class="form-control" id="inputQuantity">
+                </div>
+                <button type="submit" id="updateSubmit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+      </div>
+    </div>
+</div>
+<div class ="content-section">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}   <!--sets CSRF token -->
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Add Drug:</legend>
+            <div class="form-group">
+                {{ form.nationalDrugCode.label(class="form-control-label")}}
+                {% if form.nationalDrugCode.errors %}
+                    {{ form.nationalDrugCode(class="form-control form-control-lg is-invalid")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.nationalDrugCode.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.nationalDrugCode(class="form-control form-control-lg")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.genericName.label(class="form-control-label")}}
+                {% if form.genericName.errors %}
+                    {{ form.genericName(class="form-control form-control-lg is-invalid")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.genericName.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.genericName(class="form-control form-control-lg")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.brandName.label(class="form-control-label")}}
+                {% if form.brandName.errors %}
+                    {{ form.brandName(class="form-control form-control-lg is-invalid")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.brandName.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.brandName(class="form-control form-control-lg")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.strength.label(class="form-control-label")}}
+                {% if form.strength.errors %}
+                    {{ form.strength(class="form-control form-control-lg is-invalid")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.strength.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.strength(class="form-control form-control-lg")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.quantityAvailable.label(class="form-control-label")}}
+                {% if form.quantityAvailable.errors %}
+                    {{ form.quantityAvailable(class="form-control form-control-lg is-invalid")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.quantityAvailable.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.quantityAvailable(class="form-control form-control-lg")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info")}}
+            </div>
+        </fieldset>
+    </form>
+</div>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">NDC</th>
+            <th scope="col">Generic</th>
+            <th scope="col">Brand</th>
+            <th scope="col">Strength</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in rows %}
+        <tr id="drugrow_{{ r['nationalDrugCode'] }}">
+            <th scope="row" id="NDC_{{ r['nationalDrugCode'] }}">{{ r["nationalDrugCode"] }}</th>
+            <td id="genericName_{{ r['nationalDrugCode'] }}">{{ r["genericName"] }}</td>
+            <td id="brandName_{{ r['nationalDrugCode'] }}">{{ r["brandName"] }}</td>
+            <td id="strength_{{ r['nationalDrugCode'] }}">{{ r["strength"] }}</td>
+            <td id="quantityAvailable_{{ r['nationalDrugCode'] }}">{{ r["quantityAvailable"] }}</td>
+            <td>
+                <button type="button" id="drugUpdate_{{ r['nationalDrugCode'] }}" class="btn btn-outline-warning">Edit</button>
+                <button type="button" id="drugDelete_{{ r['nationalDrugCode'] }}" class="btn btn-outline-danger">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

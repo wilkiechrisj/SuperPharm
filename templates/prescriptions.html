@@ -1,0 +1,313 @@
+{% extends "layout.html" %}
+{% block jscode %}
+<script>
+    // script to handle update and delete functions
+    $(document).ready(function(){
+
+        //expand table click
+
+        // update button click
+        $(".btn-outline-warning").click(function(){
+
+            // saves current address fields as variables
+            var scriptID = this.id.replace("scriptUpdate_", "");
+            var scriptDate = $("#scriptDate_" + scriptID).text().trim();
+            var scriptPID = $("#scriptPID_" + scriptID).text();
+            var scriptNPI = $("#scriptNPI_" + scriptID).text();
+            var scriptNDC = $("#scriptNDC_" + scriptID).text();
+            
+            // updates hidden form values to values in row to be edited
+            $('#inputSID').val(scriptID);
+            $('#inputDate').val(scriptDate);
+            $('#inputPID').val(scriptPID);
+            $('#inputNPI').val(scriptNPI);
+            $('#inputNDC').val(scriptNDC);
+            
+            // shows update form
+            $('#inputSID').attr('disabled', true);
+            $('#updateModal').modal('show')
+
+            // submit update form
+            $('#updateForm').validate({
+
+                submitHandler: function(form) {
+                    if ($('#inputDateClr').is(':checked')){
+                        inputDate = "";
+                    } else {
+                        inputDate = $('#inputDate').val();
+                    };
+                    var formData = {
+                        sid:scriptID,
+                        sD:inputDate,
+                        sPID:$('#inputPID').val(),
+                        sNPI:$('#inputNPI').val(),
+                        sNDC:$('#inputNDC').val(),
+                    };
+                    // sends POST request to update_address route
+                    $.ajax({
+                        url: "/update_prescription",
+                        type: "POST",
+                        data: formData,
+                        success: function(successful){
+                            // refreshes page on success
+                            if (successful=1){
+                                console.log("update success");
+                                window.location.href = window.location.href;
+                            }else{
+                                console.log("update failed");
+                                window.location.href = window.location.href;
+                            };
+                        },
+                    });
+                },
+            });
+        });
+
+        // closes update popup form on click
+        $(".close").click(function(){
+            $('#updateModal').modal('hide')
+        });
+
+
+        // delete button click
+        $(".btn-outline-danger").click(function(){
+            // get addressID of row to be deleted and sends post request to delete
+            var scriptID = this.id.replace("scriptDelete_", "");
+            $.ajax({
+                url: "/delete_prescription",
+                type: "POST",
+                data: {sid:scriptID},
+                success: function(successful){
+                    if (successful=1){
+                        console.log("delete success");
+                        window.location.href = window.location.href;
+                    }else{
+                        console.log("delete failed");
+                        window.location.href = window.location.href;
+                    };
+                }
+            });
+        });
+    });
+</script>
+{% endblock jscode %}
+{% block content %}
+<h1>Prescriptions</h1>
+<section>This page is used to manage the Prescriptions Table
+    <ul>
+        <li>The "Prescriptions Table" displays all the existing Prescriptions in the Pharmacy</li>
+        <li>Pharmacy employees can use this to update, add, or delete a prescrition</li>
+    </ul>
+</section>
+<div class="modal" id="updateModal" tabindex="-1" role="dialog">  <!--modal update form -->
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Update Prescription</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="updateForm">
+                <div class="form-group">
+                    <label for="scriptID">Prescription ID</label>
+                    <input type="text" class="form-control" id="inputSID">
+                </div>
+                <div class="form-group">
+                    <label for="shipDate">Ship Date</label>
+                    <input type="date" class="form-control" id="inputDate">
+                </div>
+                <div class="form-group">
+                    <label for="shipDateClr">Clear Ship Date?</label>
+                    <input type="checkbox" id="inputDateClr">
+                </div>
+                <div class="form-group">
+                    <label for="scriptPID">Patient ID</label>
+                    <select name="scriptPID" class="form-select" id="inputPID">
+                    {% for r in rows %}
+                        <option value="{{ r['patientID'] }}">{{ r["patientID"] }}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="scriptNPI">NPI</label>
+                    <select name="scriptNPI" class="form-select" id="inputNPI">
+                        {% for r in rows %}
+                            <option value="{{ r['nationalProviderIdentifier'] }}">{{ r["nationalProviderIdentifier"] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="scriptNDC">NDC</label>
+                    <select name="scriptNDC" class="form-select" id="inputNDC">
+                        {% for r in rows %}
+                            <option value="{{ r['nationalDrugCode'] }}">{{ r["nationalDrugCode"] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" id="updateSubmit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+      </div>
+    </div>
+</div>
+<div class ="content-section">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}   <!--sets CSRF token -->
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Add Prescription:</legend>
+            <div class="form-group">
+                {{ form.patientID.label(class="form-control-label")}}
+                {% if form.patientID.errors %}
+                    {{ form.patientID(class="form-select")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.patientID.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.patientID(class="form-select")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.shipDate.label(class="form-control-label")}}
+                {% if form.shipDate.errors %}
+                    {{ form.shipDate(class="form-control form-control-lg is-invalid")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.shipDate.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.shipDate(class="form-control form-control-lg")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.nationalProviderIdentifier.label(class="form-control-label")}}
+                {% if form.nationalProviderIdentifier.errors %}
+                    {{ form.nationalProviderIdentifier(class="form-select")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.nationalProviderIdentifier.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.nationalProviderIdentifier(class="form-select")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.nationalDrugCode.label(class="form-control-label")}}
+                {% if form.nationalDrugCode.errors %}
+                    {{ form.nationalDrugCode(class="form-select")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.nationalDrugCode.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.nationalDrugCode(class="form-select")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info")}}
+            </div>
+        </fieldset>
+    </form>
+</div>
+<button type="button" class="btn btn-secondary btn-block btn-lg" data-bs-toggle="modal" data-bs-target="#expandedTable">
+    Click Here to Show Expanded Table
+</button>
+
+<div class="modal" id="expandedTable">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Expanded Prescription Table</h4>
+                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+            </div>
+  
+            <!-- Modal body -->
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Script ID</th>
+                            <th scope="col">Ship Date</th>
+                            <th scope="col">Patient ID</th>
+                            <th scope="col">Patient First Name</th>
+                            <th scope="col">Patient Last Name</th>
+                            <th scope="col">NPI</th>
+                            <th scope="col">Prescriber First Name</th>
+                            <th scope="col">Prescriber Last Name</th>
+                            <th scope="col">Prescriber Specialty</th>
+                            <th scope="col">Generic Name</th>
+                            <th scope="col">Brand Name</th>
+                            <th scope="col">Strength</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rw in expand_rows %}
+                        <tr>
+                            <td>{{ rw["scriptID"] }}</td>
+                            <td>
+                                {% if rw["shipDate"] %}
+                                    {{ rw["shipDate"] }}
+                                {% endif %}
+                            </td>
+                            <td>{{ rw["patientID"] }}</td>
+                            <td>{{ rw["firstName"] }}</td>
+                            <td>{{ rw["lastName"] }}</td>
+                            <td>{{ rw["nationalProviderIdentifier"] }}</td>
+                            <td>{{ rw["prfirstName"] }}</td>
+                            <td>{{ rw["prlastName"] }}</td>
+                            <td>{{ rw["specialty"] }}</td>
+                            <td>{{ rw["genericName"] }}</td>
+                            <td>{{ rw["brandName"] }}</td>
+                            <td>{{ rw["strength"] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Script ID</th>
+            <th scope="col">Ship Date</th>
+            <th scope="col">Patient ID</th>
+            <th scope="col">NPI</th>
+            <th scope="col">NDC</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in rows %}
+        <tr id="scriptrow_{{ r['scriptID'] }}">
+            <th scope="row" id="scriptID_{{ r['scriptID'] }}">{{ r["scriptID"] }}</th>
+            <td id="scriptDate_{{ r['scriptID'] }}">
+                {% if r["shipDate"] %}
+                    {{ r["shipDate"] }}
+                {% endif %}
+            </td>
+            <td id="scriptPID_{{ r['scriptID'] }}">{{ r["patientID"] }}</td>
+            <td id="scriptNPI_{{ r['scriptID'] }}">{{ r["nationalProviderIdentifier"] }}</td>
+            <td id="scriptNDC_{{ r['scriptID'] }}">{{ r["nationalDrugCode"] }}</td>
+            <td>
+                <button type="button" id="scriptUpdate_{{ r['scriptID'] }}" class="btn btn-outline-warning">Edit</button>
+                <button type="button" id="scriptDelete_{{ r['scriptID'] }}"  class="btn btn-outline-danger">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

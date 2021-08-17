@@ -1,0 +1,324 @@
+{% extends "layout.html" %}
+{% block jscode %}
+<script>
+    // script to handle update and delete functions
+    $(document).ready(function(){
+
+        // update button click
+        $(".btn-outline-warning").click(function(){
+
+            // saves current address fields as variables
+            var addressID = this.id.replace("addressUpdate_", "");
+            var address1 = $("#address1_" + addressID).text();
+            var address2 = $("#address2_" + addressID).text().trim();
+            var addressCity = $("#addressCity_" + addressID).text();
+            var addressState = $("#addressState_" + addressID).text();
+            var addressZip = $("#addressZip_" + addressID).text();
+            
+            // updates hidden form values to values in row to be edited
+            $('#inputAddressID').val(addressID);
+            $('#inputAddress1').val(address1);
+            $('#inputAddress2').val(address2);
+            $('#inputCity').val(addressCity);
+            $('#inputState').val(addressState);
+            $('#inputZip').val(addressZip);
+            
+            // shows update form
+            $('#inputAddressID').attr('disabled', true);
+            $('#updateModal').modal('show');
+            
+            // update form validation
+            $('#updateForm').validate({
+                rules: {
+                    address1: {
+                        required: true,
+                        maxlength: 255
+                    },
+                    address2: {
+                        required: false,
+                        maxlength: 255
+                    },
+                    city: {
+                        required: true,
+                        maxlength: 255
+                    },
+                    zip: {
+                        required: true,
+                        maxlength: 5,
+                        minlength: 5,
+                        digits: true,
+                    },
+                },
+                messages: {
+                    zip: 'Please enter a five digit numeric zip code'
+                },
+                submitHandler: function(form) {
+                    var formData = {
+                        id:addressID,
+                        line1:$('#inputAddress1').val(),
+                        line2:$('#inputAddress2').val(),
+                        city:$('#inputCity').val(),
+                        state:$('#inputState').val(),
+                        zip:$('#inputZip').val(),
+                    };
+                
+                    // sends POST request to update_address route
+                    $.ajax({
+                        url: "/update_address",
+                        type: "POST",
+                        data: formData,
+                        success: function(successful){
+                            // refreshes page on success
+                            if (successful=1){
+                                console.log("update success");
+                                window.location.href = window.location.href;
+                            }else{
+                                console.log("update failed");
+                                window.location.href = window.location.href;
+                            };
+                        },
+                    });
+                },
+            });
+        });
+
+        // closes update popup form on click
+        $(".close").click(function(){
+            $('#updateModal').modal('hide')
+        });
+
+
+        // delete button click
+        $(".btn-outline-danger").click(function(){
+            // get addressID of row to be deleted and sends post request to delete
+            var addressID = this.id.replace("addressDelete_", "");
+            $.ajax({
+                url: "/delete_address",
+                type: "POST",
+                data: {id:addressID},
+                success: function(successful){
+                    if (successful=1){
+                        console.log("delete success");
+                        window.location.href = window.location.href;
+                    }else{
+                        console.log("delete failed");
+                        window.location.href = window.location.href;
+                    };
+                }
+            });
+        });
+    });
+</script>
+{% endblock jscode %}
+{% block content %}
+<h1>Addresses</h1>
+<section>This page is used to manage the Address Table
+    <ul>
+        <li>The "Address Table" displays all the existing addresses</li>
+        <li>Pharmacy employees can use this to update, add, or devare an address</li>
+        <li>One address can be linked to multiple patients so please be careful!</li>
+    </ul>
+</section>
+<div class="modal" id="updateModal" tabindex="-1" role="dialog">  <!--modal update form -->
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Update Address</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="updateForm">
+                <div class="form-group">
+                    <label for="addressID">Address ID</label>
+                    <input type="text" name="addressID" class="form-control" id="inputAddressID">
+                </div>
+                <div class="form-group">
+                    <label for="address1">Address Line 1</label>
+                    <input type="text" name="address1" class="form-control" id="inputAddress1">
+                </div>
+                <div class="form-group">
+                    <label for="address2">Address Line 2</label>
+                    <input type="text" name="address2" class="form-control" id="inputAddress2">
+                </div>
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text"  name="city" class="form-control" id="inputCity">
+                </div>
+                <div class="form-group">
+                    <label for="state">State</label>
+                    <select class="form-select" id="inputState">
+                        <option value="AL">AL</option>
+                        <option value="AK">AK</option>
+                        <option value="AR">AR</option>	
+                        <option value="AZ">AZ</option>
+                        <option value="CA">CA</option>
+                        <option value="CO">CO</option>
+                        <option value="CT">CT</option>
+                        <option value="DC">DC</option>
+                        <option value="DE">DE</option>
+                        <option value="FL">FL</option>
+                        <option value="GA">GA</option>
+                        <option value="HI">HI</option>
+                        <option value="IA">IA</option>	
+                        <option value="ID">ID</option>
+                        <option value="IL">IL</option>
+                        <option value="IN">IN</option>
+                        <option value="KS">KS</option>
+                        <option value="KY">KY</option>
+                        <option value="LA">LA</option>
+                        <option value="MA">MA</option>
+                        <option value="MD">MD</option>
+                        <option value="ME">ME</option>
+                        <option value="MI">MI</option>
+                        <option value="MN">MN</option>
+                        <option value="MO">MO</option>	
+                        <option value="MS">MS</option>
+                        <option value="MT">MT</option>
+                        <option value="NC">NC</option>	
+                        <option value="NE">NE</option>
+                        <option value="NH">NH</option>
+                        <option value="NJ">NJ</option>
+                        <option value="NM">NM</option>			
+                        <option value="NV">NV</option>
+                        <option value="NY">NY</option>
+                        <option value="ND">ND</option>
+                        <option value="OH">OH</option>
+                        <option value="OK">OK</option>
+                        <option value="OR">OR</option>
+                        <option value="PA">PA</option>
+                        <option value="RI">RI</option>
+                        <option value="SC">SC</option>
+                        <option value="SD">SD</option>
+                        <option value="TN">TN</option>
+                        <option value="TX">TX</option>
+                        <option value="UT">UT</option>
+                        <option value="VT">VT</option>
+                        <option value="VA">VA</option>
+                        <option value="WA">WA</option>
+                        <option value="WI">WI</option>	
+                        <option value="WV">WV</option>
+                        <option value="WY">WY</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="zip">Zip</label>
+                    <input type="text" name="zip" class="form-control" id="inputZip">
+                </div>
+                <button type="submit" id="updateSubmit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+      </div>
+    </div>
+</div>
+<div class ="content-section">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}   <!--sets CSRF token -->
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Add Address:</legend>
+            <div class="form-group">
+                {{ form.address1.label(class="form-control-label")}}
+                {% if form.address1.errors %}
+                    {{ form.address1(class="form-control form-control-lg is-invalid")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.address1.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.address1(class="form-control form-control-lg")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.address2.label(class="form-control-label")}}
+                {% if form.address2.errors %}
+                    {{ form.address2(class="form-control form-control-lg is-invalid")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.address2.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.address2(class="form-control form-control-lg")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.city.label(class="form-control-label")}}
+                {% if form.city.errors %}
+                    {{ form.city(class="form-control form-control-lg is-invalid")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.city.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.city(class="form-control form-control-lg")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.state.label(class="form-control-label")}}
+                {% if form.state.errors %}
+                    {{ form.state(class="form-select")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.state.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.state(class="form-select")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.zipcode.label(class="form-control-label")}}
+                {% if form.zipcode.errors %}
+                    {{ form.zipcode(class="form-control form-control-lg is-invalid")}}
+                    <div class='invalid-feedback'>
+                        {% for error in form.zipcode.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.zipcode(class="form-control form-control-lg")}}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info")}}
+            </div>
+        </fieldset>
+    </form>
+</div>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Address Line 1</th>
+            <th scope="col">Address Line 2</th>
+            <th scope="col">City</th>
+            <th scope="col">State</th>
+            <th scope="col">Zip</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in rows %}
+        <tr id="addressrow_{{ r['addressID'] }}">
+            <th scope="row" id="addressID_{{ r['addressID'] }}">{{ r["addressID"] }}</th>
+            <td id="address1_{{ r['addressID'] }}">{{ r["address1"] }}</td>
+            <td id="address2_{{ r['addressID'] }}">
+                {% if r["address2"] %}
+                    {{ r["address2"] }}
+                {% endif %}
+            </td>
+            <td id="addressCity_{{ r['addressID'] }}">{{ r["city"] }}</td>
+            <td id="addressState_{{ r['addressID'] }}">{{ r["state"] }}</td>
+            <td id="addressZip_{{ r['addressID'] }}">{{ r["zip"] }}</td>
+            <td>
+                <button type="button" id="addressUpdate_{{ r['addressID'] }}" class="btn btn-outline-warning">Edit</button>
+                <button type="button" id="addressDelete_{{ r['addressID'] }}" class="btn btn-outline-danger">Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

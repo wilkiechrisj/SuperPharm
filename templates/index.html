@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="titleDiv">
+    <h1>SciGuys SuperPharm</h1>
+</div>
+
+    <div id="navDiv">
+        <table id="indexNav">
+            <tr>
+                <td><a href="{{ url_for('patients') }}">Patients</a></td>
+                <td><a href="{{ url_for('addresses') }}">Addresses</a></td>
+                <td><a href="{{ url_for('drugs') }}">Medications</a></td>
+            </tr>
+            <tr>
+                <td><a href="{{ url_for('prescriptions') }}">Prescriptions</a></td>
+                <td><a href="{{ url_for('providers') }}">Providers</a></td>
+                <td><a href="{{ url_for('hcp_pt') }}">Patient Provider Portal</a></td>
+            </tr>
+        </table>
+    </div>
+{% endblock content %}
